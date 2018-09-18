@@ -52,7 +52,7 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
-def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
+def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     """
     NOTE: this is the function you might want to use as a starting point once you want to 
     average/extrapolate the line segments you detect to map out the full
@@ -177,7 +177,7 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-    draw_lines(line_img, lines)
+    # draw_lines(line_img, lines)
     draw_lines_extrapolate(line_img, lines)
     return line_img
 
@@ -304,22 +304,13 @@ def test_images(folder_src,folder_dst="test_images_output/challenge"):
 		lined_edges = np.dstack((b,g,r))
 	    
 		#draw ROI line
-		cv2.line(lined_edges, (160, 720),(615,430), (255,0,0),2)
-		cv2.line(lined_edges, (615,430),(700,430), (255,0,0),2)
-		cv2.line(lined_edges, (700,430),(1210, 720), (255,0,0),2)
+		# cv2.line(lined_edges, (160, 720),(615,430), (255,0,0),2)
+		# cv2.line(lined_edges, (615,430),(700,430), (255,0,0),2)
+		# cv2.line(lined_edges, (700,430),(1210, 720), (255,0,0),2)
 
 		cv2.imwrite(output_imgpath, lined_edges) # matplotlib.image not support save jpg file
 
-	    # plt.figure()
-	    # plt.imshow(img)
-
-	    # plt.figure()
-	    # plt.imshow(lined_edges)
-
-	    # plt.show()
-
-	    # break
-
+################################################################
 # set the paramters
 kernel_size = 5 # paramter for guassian_blur
 
@@ -330,7 +321,7 @@ high_threshold = 200
 rho = 1 # angular resolution in pixels of the Hough grid
 theta = np.pi/180 # angular resolution in radians of the Hough grid
 threshold = 15 # minimum number of pixels making up a line
-min_line_len = 10 # minumum number of pixels making up a line
+min_line_len = 15 # minumum number of pixels making up a line
 max_line_gap = 20 # maximum gap in pixels making up a line
 
 k_threshold_low = 0.5	# used to exclude the horizental line
@@ -344,8 +335,8 @@ vertices = np.array([[(160, 720),(615,430),(700,430),(1210, 720)]],dtype=np.int3
 # white_threshold = ((10,0,100),(60,30,255))
 white_threshold = ((10,0,100),(180,30,255))
 yellow_threshold = ((10,60,0),(30,255,255))
+########################################################################################
 
+# test_image('test_images/challenge/4.4.jpg')
 
-test_image('test_images/challenge/5.9.jpg')
-
-# test_images("test_images/challenge")
+test_images("test_images/challenge")

@@ -52,7 +52,7 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
-def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
+def draw_lines(img, lines, color=[255, 0, 0], thickness=6):
     """
     NOTE: this is the function you might want to use as a starting point once you want to 
     average/extrapolate the line segments you detect to map out the full
@@ -224,27 +224,39 @@ def test_img(file):
     # plt.imshow(color_mask,cmap="gray")
     
     lined_edges = hough_lines(masked_edges, rho, theta, threshold, min_line_len, max_line_gap)
+    plt.figure()
+    plt.imshow(lined_edges)
+
     masked_lined_edges = region_of_interest(lined_edges, vertices)
-    lined_img = weighted_img(lined_edges, img, α=0.8, β=1., γ=0.)
+    plt.figure()
+    plt.imshow(masked_lined_edges)
 
-    # plt.figure()
-    # plt.imshow(edges,cmap='gray')
+    lined_img = weighted_img(masked_lined_edges, img, α=0.8, β=1., γ=0.)
 
-    # plt.figure()
-    # plt.imshow(masked_edges,cmap='gray')
+    plt.figure()
+    plt.imshow(edges,cmap='gray')
 
-    # plt.figure()
-    # plt.imshow(lined_edges)
+    plt.figure()
+    plt.imshow(masked_edges,cmap='gray')
 
-    # plt.figure()
-    # plt.imshow(lined_img)
+    plt.figure()
+    plt.imshow(lined_edges)
 
-    plt.subplot(231),plt.imshow(img),plt.title("Original")
-    plt.subplot(232),plt.imshow(img_gray,cmap="gray"),plt.title("Gray Img")
-    plt.subplot(233),plt.imshow(blur_gray,cmap="gray"),plt.title("blur_gray")
-    plt.subplot(234),plt.imshow(edges,cmap="gray"),plt.title("Edges")
-    plt.subplot(235),plt.imshow(masked_edges,cmap="gray"),plt.title("Edges ROI")
-    plt.subplot(236),plt.imshow(masked_lined_edges),plt.title("Draw Lines")
+    plt.figure()
+    plt.imshow(lined_img)
+
+    plt.subplot(131),plt.imshow(lined_edges),plt.title("Left/Right Lane")
+    plt.subplot(132),plt.imshow(masked_lined_edges),plt.title("Lanes Masked")
+    plt.subplot(133),plt.imshow(lined_img),plt.title("Annotated Img")
+        
+
+
+    # plt.subplot(231),plt.imshow(img),plt.title("Original")
+    # plt.subplot(232),plt.imshow(img_gray,cmap="gray"),plt.title("Gray Img")
+    # plt.subplot(233),plt.imshow(blur_gray,cmap="gray"),plt.title("blur_gray")
+    # plt.subplot(234),plt.imshow(edges,cmap="gray"),plt.title("Edges")
+    # plt.subplot(235),plt.imshow(masked_edges,cmap="gray"),plt.title("Edges ROI")
+    # plt.subplot(236),plt.imshow(masked_lined_edges),plt.title("Draw Lines")
 
 
 
@@ -252,37 +264,49 @@ def test_img(file):
 
     plt.show()
 
-# def img_lane_detect(img):
-# 	"""
-# 	This function is used to package the lane detect pipline, all the paramter should set/ajust out of this function.
-# 	"""
-# 	white_mask = HSV_mask(img, white_threshold)
-# 	yellow_mask = HSV_mask(img, yellow_threshold)
-# 	color_mask = white_mask | yellow_mask
+def img_lane_detect(img):
+	"""
+	This function is used to package the lane detect pipline, all the paramter should set/ajust out of this function.
+	"""
+	white_mask = HSV_mask(img, white_threshold)
+	yellow_mask = HSV_mask(img, yellow_threshold)
+	color_mask = white_mask | yellow_mask
 
-# 	img_gray = grayscale(img)
-# 	blur_gray = gaussian_blur(img, kernel_size)
-# 	edges = canny(blur_gray, low_threshold, high_threshold)
-# 	masked_edges = region_of_interest(edges, vertices)
-# 	masked_edges[color_mask==0] = 0 # apply color mask
-# 	lined_edges = hough_lines(masked_edges, rho, theta, threshold, min_line_len, max_line_gap)
-# 	masked_lined_edges = region_of_interest(lined_edges, vertices)
+	img_gray = grayscale(img)
+	blur_gray = gaussian_blur(img, kernel_size)
+	edges = canny(blur_gray, low_threshold, high_threshold)
+	masked_edges = region_of_interest(edges, vertices)
+	masked_edges[color_mask==0] = 0 # apply color mask
+	lined_edges = hough_lines(masked_edges, rho, theta, threshold, min_line_len, max_line_gap)
+	masked_lined_edges = region_of_interest(lined_edges, vertices)
 
-# 	return weighted_img(masked_lined_edges, img, α=0.8, β=1., γ=0.)
-
-# for file in os.listdir("test_images/"):
-#     img = mpimg.imread("test_images/"+file)
-#     print(file)
-#     lined_edges = img_lane_detect(img)
-#     outputfile_name = "test_images_output/"+file
-#     print(outputfile_name)
-    
-#     # swith the RGB to BGR
-#     r,g,b = lined_edges[:,:,0], lined_edges[:,:,1], lined_edges[:,:,2]
-#     lined_edges = np.dstack((b,g,r))
-#     cv2.imwrite(outputfile_name, lined_edges) # matplotlib.image not support save jpg file
+	return weighted_img(masked_lined_edges, img, α=0.8, β=1., γ=0.)
 
 
+def test_images(folder_src,folder_dst="test_images_output"):
+    for file in os.listdir(folder_src):
+        if file == "challenge": # skip the challenge folder
+            continue
+        imgpath = os.path.join(folder_src,file)
+        img = mpimg.imread(imgpath)
+        lined_edges = img_lane_detect(img)
+        output_imgpath = os.path.join(folder_dst,file)
+        print(output_imgpath)
+
+
+
+        # swith the RGB to BGR
+        r,g,b = lined_edges[:,:,0], lined_edges[:,:,1], lined_edges[:,:,2]
+        lined_edges = np.dstack((b,g,r))
+        
+        #draw ROI line
+        # cv2.line(lined_edges, (160, 720),(615,430), (255,0,0),2)
+        # cv2.line(lined_edges, (615,430),(700,430), (255,0,0),2)
+        # cv2.line(lined_edges, (700,430),(1210, 720), (255,0,0),2)
+
+        cv2.imwrite(output_imgpath, lined_edges) # matplotlib.image not support save jpg file
+
+#################################################################################################
 # set the paramters
 kernel_size = 5 # paramter for guassian_blur
 
@@ -308,4 +332,8 @@ k_diff_threshold = 0.1  # in lines check, to sorted out the lines which's slope 
 white_threshold = ((60,0,130),(180,50,255))
 yellow_threshold = ((10,60,0),(30,255,255))
 
-test_img("test_images/solidWhiteRight.jpg")
+#################################################################################################
+
+# test_img("test_images/solidWhiteRight.jpg")
+
+test_images("test_images")
